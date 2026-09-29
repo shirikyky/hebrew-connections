@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>חיבורים — משחק מילים יומי</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>חיבורים</h1>
+    <p class="subtitle">מצאו 4 קבוצות של 4 מילים — אתגר חדש בכל יום</p>
+  </header>
+
+  <div id="lives" aria-label="טעויות"></div>
+  <div id="message" role="status"></div>
+
+  <main id="grid"></main>
+
+  <section id="solved"></section>
+
+  <div id="controls">
+    <button id="shuffle" type="button">ערבבי 🔀</button>
+    <button id="submit" type="button" class="primary">נחשי ✔</button>
+  </div>
+
+  <button id="share" type="button" hidden>שתפי תוצאה 📤</button>
+
+  <div id="overlay" hidden></div>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
