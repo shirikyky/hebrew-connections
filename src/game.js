@@ -120,6 +120,14 @@ export function getFullAnswers(state) {
   return out;
 }
 
+// 3 כוכבים = 0 טעויות, 2 = טעות אחת, 1 = 2–3 טעויות (עדיין ניצחון)
+export function starsFor(state) {
+  if (state.status !== 'won') return 0;
+  if (state.mistakes === 0) return 3;
+  if (state.mistakes === 1) return 2;
+  return 1;
+}
+
 const EMOJI = { yellow: '🟨', green: '🟩', blue: '🟦', purple: '🟪' };
 
 export function shareString(state, puzzleNumber) {
