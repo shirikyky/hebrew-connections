@@ -31,7 +31,7 @@ body {
 /* ---- כותרת + דמות ---- */
 header {
   text-align: center;
-  padding: 18px 12px 6px;
+  padding: 16px 12px 6px;
 }
 
 #mascot {
@@ -61,6 +61,63 @@ h1 {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 14px;
+}
+
+/* ---- שורת סטטוס (רצף, הקפאות, XP) ---- */
+#stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px auto 0;
+  max-width: 480px;
+  padding: 0 12px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+#stats > span,
+#buy-freeze {
+  background: #fff;
+  border-radius: 999px;
+  padding: 4px 10px;
+  box-shadow: 0 2px 0 #e8d5b5;
+}
+
+#buy-freeze {
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.xp-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border-radius: 999px;
+  padding: 4px 10px;
+  box-shadow: 0 2px 0 #e8d5b5;
+}
+
+.xp-bar {
+  display: inline-block;
+  width: 70px;
+  height: 8px;
+  border-radius: 999px;
+  background: #f0e6d4;
+  overflow: hidden;
+}
+
+#xp-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.3s ease;
 }
 
 /* ---- טאבים ---- */
@@ -247,11 +304,32 @@ h1 {
   animation: popIn 0.3s both;
 }
 
+/* ---- כפתורי מודעות מתוגמלות ---- */
+#rewards {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 10px 12px 0;
+}
+
+#rewards button {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 999px;
+  border: none;
+  background: #fff;
+  box-shadow: 0 2px 0 #e8d5b5;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--text);
+}
+
 #controls {
   display: flex;
   gap: 10px;
   justify-content: center;
-  margin: 16px 12px;
+  margin: 12px 12px;
 }
 
 #controls button,
@@ -307,6 +385,61 @@ h1 {
   font-size: 30px;
   letter-spacing: 2px;
   margin: 4px 0 10px;
+}
+
+.streak-line {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 4px 0 10px;
+}
+
+/* ---- מודעת פרסומת (סימולציה) ---- */
+#ad-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 70;
+}
+
+.ad-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.ad-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+#ad-text {
+  margin: 10px 0;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.ad-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #f0e6d4;
+  overflow: hidden;
+}
+
+#ad-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 999px;
 }
 
 /* ---- קונפטי ---- */

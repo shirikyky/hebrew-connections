@@ -8,6 +8,7 @@ import {
   getFullAnswers,
   starsFor,
 } from './game.js';
+import { updateStreak, todayKey, levelFromXp } from './progress.js';
 
 const STORAGE_KEY = 'hebrew-connections-progress';
 const DAY0 = Date.UTC(2026, 0, 1);
@@ -22,12 +23,14 @@ const levelSelectEl = $('level-select');
 const gameScreenEl = $('game');
 const overlayEl = $('overlay');
 const confettiEl = $('confetti');
+const adModalEl = $('ad-modal');
 
 let mode = 'levels'; // 'levels' | 'daily'
 let currentLevel = 0;
 let game = null;
 let puzzleNumber = 0;
 let introDone = false;
+let lastStreakResult = null;
 
 const COLOR = {
   yellow: '#f6d860',
@@ -35,6 +38,48 @@ const COLOR = {
   blue: '#8ba5e8',
   purple: '#c08fe0',
 };
+
+// ---- התקדמות (localStorage) ----
+function loadProgress() {
+  const base = { stars: {}, streak: 0, lastPlayed: null, freezes: 0, xp: 0 };
+  try {
+    return { ...base, ...(JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}) };
+  } catch {
+    return { ...base };
+  }
+}
+
+function saveProgress(p) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+}
+
+function renderStats() {
+  const p = loadProgress();
+  const { level, progress } = levelFromXp(p.xp || 0);
+  $('stat-streak').textContent = `🔥 ${p.streak || 0}`;
+  $('stat-freezes').textContent = `❄️ ${p.freezes || 0}`;
+  $('stat-level').textContent = `רמה ${level}`;
+  $('xp-fill').style.width = (progress * 100) + '%';
+  $('stat-xp').textContent = `${(p.xp || 0) % 100}/100`;
+}
+
+function awardXP(n) {
+  const p = loadProgress();
+  p.xp = (p.xp || 0) + n;
+  saveProgress(p);
+  renderStats();
+}
+
+function recordDailyPlay() {
+  const p = loadProgress();
+  const r = updateStreak(p, todayKey());
+  r.progress.stars = p.stars || {};
+  r.progress.xp = p.xp || 0;
+  saveProgress(r.progress);
+  lastStreakResult = r;
+  renderStats();
+  return r;
+}
 
 // ---- דמות (מצבי הבעה) ----
 function setFace(face, bounce = false) {
@@ -51,19 +96,6 @@ function setFace(face, bounce = false) {
   }
 }
 
-// ---- התקדמות (localStorage) ----
-function loadProgress() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function saveProgress(p) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
-}
-
 // ---- ניווט ----
 function showLevels() {
   mode = 'levels';
@@ -72,6 +104,7 @@ function showLevels() {
   $('tab-levels').classList.add('active');
   $('tab-daily').classList.remove('active');
   renderLevelSelect();
+  renderStats();
   setFace('happy');
 }
 
@@ -82,6 +115,7 @@ function startLevel(i) {
   game = createGame(puzzle, puzzle.id);
   puzzleNumber = i + 1;
   introDone = false;
+  lastStreakResult = null;
   levelSelectEl.hidden = true;
   gameScreenEl.hidden = false;
   $('share').hidden = true;
@@ -98,6 +132,7 @@ function startDaily() {
   game = createGame(puzzle, seed);
   puzzleNumber = Math.floor((now.getTime() - DAY0) / 86400000) + 1;
   introDone = false;
+  lastStreakResult = null;
   levelSelectEl.hidden = true;
   gameScreenEl.hidden = false;
   $('share').hidden = true;
@@ -121,8 +156,8 @@ function renderLevelSelect() {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'level-tile';
-    const stars = progress[p.id] || 0;
-    const unlocked = i === 0 || !!progress[puzzles[i - 1].id];
+    const stars = (progress.stars && progress.stars[p.id]) || 0;
+    const unlocked = i === 0 || !!(progress.stars && progress.stars[puzzles[i - 1].id]);
     if (!unlocked) {
       btn.classList.add('locked');
       btn.disabled = true;
@@ -230,6 +265,16 @@ function showOverlay() {
     box.appendChild(starsEl);
   }
 
+  if (mode === 'daily' && lastStreakResult) {
+    const line = document.createElement('p');
+    line.className = 'streak-line';
+    line.textContent = `🔥 רצף: ${lastStreakResult.progress.streak} ימים`;
+    if (lastStreakResult.freezesUsed > 0) {
+      line.textContent += ' (❄️ הקפאה הגנה עליך)';
+    }
+    box.appendChild(line);
+  }
+
   for (const a of getFullAnswers(game)) {
     const chip = document.createElement('div');
     chip.className = 'solved-chip';
@@ -274,6 +319,53 @@ function render() {
   }
 }
 
+// ---- מודעות מתוגמלות (סימולציה; החלף ל-AdMob אמיתי) ----
+function showRewardedAd(label, onReward) {
+  $('ad-text').textContent = label;
+  adModalEl.hidden = false;
+  const fill = $('ad-fill');
+  fill.style.width = '0%';
+  let w = 0;
+  const id = setInterval(() => {
+    w += 4;
+    fill.style.width = w + '%';
+    if (w >= 100) {
+      clearInterval(id);
+      adModalEl.hidden = true;
+      onReward();
+    }
+  }, 90);
+}
+
+function giveHint() {
+  if (!game || game.status !== 'playing' || game.categories.length === 0) return;
+  showRewardedAd('מודעה — תקבלי רמז 🎁', () => {
+    const cat = game.categories[Math.floor(Math.random() * game.categories.length)];
+    game.message = `💡 אחת הקבוצות היא: ${cat.name}`;
+    setFace('excited', true);
+    render();
+  });
+}
+
+function giveLife() {
+  if (!game || game.status !== 'playing' || game.mistakes <= 0) return;
+  showRewardedAd('מודעה — תקבלי חיים ❤️', () => {
+    game.mistakes -= 1;
+    setFace('happy', true);
+    render();
+  });
+}
+
+function buyFreeze() {
+  showRewardedAd('מודעה — תקבלי הקפאת רצף ❄️', () => {
+    const p = loadProgress();
+    p.freezes = (p.freezes || 0) + 1;
+    saveProgress(p);
+    renderStats();
+    setFace('excited', true);
+  });
+}
+
 // ---- אירועים ----
 $('submit').addEventListener('click', () => {
   const solvedBefore = game.solved.length;
@@ -281,15 +373,29 @@ $('submit').addEventListener('click', () => {
 
   submitGuess(game);
 
+  if (game.solved.length > solvedBefore) {
+    awardXP((game.solved.length - solvedBefore) * 15);
+  }
+
   if (game.status === 'won') {
+    awardXP(50);
     if (mode === 'levels') {
       const progress = loadProgress();
       const s = starsFor(game);
-      if (s > (progress[puzzles[currentLevel].id] || 0)) {
-        progress[puzzles[currentLevel].id] = s;
+      if (s > ((progress.stars[puzzles[currentLevel].id]) || 0)) {
+        progress.stars[puzzles[currentLevel].id] = s;
         saveProgress(progress);
       }
+    } else {
+      awardXP(20);
+      recordDailyPlay();
     }
+  } else if (game.status === 'lost') {
+    if (mode === 'daily') {
+      awardXP(20);
+      recordDailyPlay();
+    }
+    setFace('sad', true);
   } else if (game.solved.length > solvedBefore) {
     setFace('excited', true);
   } else if (game.mistakes > mistakesBefore) {
@@ -308,6 +414,10 @@ $('shuffle').addEventListener('click', () => {
 $('back').addEventListener('click', showLevels);
 $('tab-levels').addEventListener('click', showLevels);
 $('tab-daily').addEventListener('click', startDaily);
+
+$('hint').addEventListener('click', giveHint);
+$('life').addEventListener('click', giveLife);
+$('buy-freeze').addEventListener('click', buyFreeze);
 
 $('share').addEventListener('click', async () => {
   const text = shareString(game, puzzleNumber);
