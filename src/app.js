@@ -11,8 +11,25 @@ import {
 import { updateStreak, todayKey, levelFromXp } from './progress.js';
 
 const STORAGE_KEY = 'hebrew-connections-progress';
+const ONBOARD_KEY = 'hebrew-connections-onboarded';
 const DAY0 = Date.UTC(2026, 0, 1);
 const FACES = ['happy', 'excited', 'sad', 'thinking'];
+
+// עקומת קושי: רמות ממוינות קל → קשה (מציאת המחקר — להתחיל קל)
+const LEVELS = [...puzzles].sort((a, b) => (a.difficulty || 1) - (b.difficulty || 1));
+
+const DIFF = {
+  1: { label: 'קל', color: '#4caf50' },
+  2: { label: 'בינוני', color: '#e8930c' },
+  3: { label: 'קשה', color: '#d9534f' },
+};
+
+const ONBOARDING_STEPS = [
+  { title: 'ברוכה הבאה! 😺', text: 'אני חתולי, ואני אלמד אותך לשחק ב-30 שניות.' },
+  { title: '16 מילים 🔤', text: 'בכל חידה יש 16 מילים. מיין אותן ל-4 קבוצות של 4 מילים קשורות.' },
+  { title: 'בחרי 4 וניחשי 🎯', text: 'לחצי על 4 מילים ששייכות יחד, ואז על "נחשי".' },
+  { title: '4 ניסיונות בלבד 💛', text: 'טעות = ניסיון אבוד. נצחי בלי טעויות = 3 כוכבים ⭐⭐⭐' },
+];
 
 const $ = (id) => document.getElementById(id);
 const gridEl = $('grid');
@@ -31,6 +48,7 @@ let game = null;
 let puzzleNumber = 0;
 let introDone = false;
 let lastStreakResult = null;
+let obStep = 0;
 
 const COLOR = {
   yellow: '#f6d860',
@@ -96,6 +114,46 @@ function setFace(face, bounce = false) {
   }
 }
 
+// ---- onboarding (חוויית משתמש ראשונה) ----
+function renderOnboarding() {
+  const s = ONBOARDING_STEPS[obStep];
+  $('ob-title').textContent = s.title;
+  $('ob-text').textContent = s.text;
+  const dots = $('ob-dots');
+  dots.innerHTML = '';
+  ONBOARDING_STEPS.forEach((_, i) => {
+    const d = document.createElement('span');
+    d.className = 'ob-dot' + (i === obStep ? ' active' : '');
+    dots.appendChild(d);
+  });
+  $('ob-next').textContent =
+    obStep === ONBOARDING_STEPS.length - 1 ? 'בואי נשחק! 🎮' : 'הבא ➡';
+}
+
+function showOnboarding() {
+  obStep = 0;
+  $('onboarding').hidden = false;
+  renderOnboarding();
+}
+
+function hideOnboarding() {
+  $('onboarding').hidden = true;
+  localStorage.setItem(ONBOARD_KEY, '1');
+}
+
+function obNext() {
+  obStep += 1;
+  if (obStep >= ONBOARDING_STEPS.length) {
+    hideOnboarding();
+    return;
+  }
+  renderOnboarding();
+}
+
+function maybeShowOnboarding() {
+  if (!localStorage.getItem(ONBOARD_KEY)) showOnboarding();
+}
+
 // ---- ניווט ----
 function showLevels() {
   mode = 'levels';
@@ -111,7 +169,7 @@ function showLevels() {
 function startLevel(i) {
   currentLevel = i;
   mode = 'levels';
-  const puzzle = puzzles[i];
+  const puzzle = LEVELS[i];
   game = createGame(puzzle, puzzle.id);
   puzzleNumber = i + 1;
   introDone = false;
@@ -152,12 +210,12 @@ function renderLevelSelect() {
   const grid = document.createElement('div');
   grid.className = 'level-grid';
 
-  puzzles.forEach((p, i) => {
+  LEVELS.forEach((p, i) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'level-tile';
     const stars = (progress.stars && progress.stars[p.id]) || 0;
-    const unlocked = i === 0 || !!(progress.stars && progress.stars[puzzles[i - 1].id]);
+    const unlocked = i === 0 || !!(progress.stars && progress.stars[LEVELS[i - 1].id]);
     if (!unlocked) {
       btn.classList.add('locked');
       btn.disabled = true;
@@ -167,6 +225,14 @@ function renderLevelSelect() {
       num.className = 'lv-num';
       num.textContent = i + 1;
       btn.appendChild(num);
+
+      const d = DIFF[p.difficulty] || DIFF[1];
+      const diff = document.createElement('span');
+      diff.className = 'lv-diff';
+      diff.textContent = d.label;
+      diff.style.color = d.color;
+      btn.appendChild(diff);
+
       if (stars) {
         const s = document.createElement('span');
         s.className = 'lv-stars';
@@ -287,11 +353,11 @@ function showOverlay() {
   next.type = 'button';
   next.className = 'primary';
   next.textContent =
-    won && mode === 'levels' && currentLevel + 1 < puzzles.length
+    won && mode === 'levels' && currentLevel + 1 < LEVELS.length
       ? 'רמה הבאה ➡'
       : 'חזרה לרמות';
   next.addEventListener('click', () => {
-    if (won && mode === 'levels' && currentLevel + 1 < puzzles.length) {
+    if (won && mode === 'levels' && currentLevel + 1 < LEVELS.length) {
       startLevel(currentLevel + 1);
     } else {
       showLevels();
@@ -366,6 +432,37 @@ function buyFreeze() {
   });
 }
 
+// ---- שיתוף (לולאת צמיחה ויראלית — כמו Wordle) ----
+function buildShareText() {
+  const p = loadProgress();
+  let text = shareString(game, puzzleNumber);
+  if (mode === 'daily' && (p.streak || 0) > 0) {
+    text += `\n🔥 רצף: ${p.streak} ימים`;
+  }
+  text += '\n\nhttps://shirikyky.github.io/hebrew-connections/';
+  return text;
+}
+
+async function doShare() {
+  const text = buildShareText();
+  // Web Share API — פותח את דף השיתוף המקורי (וואטסאפ/טלגרם וכו')
+  if (navigator.share) {
+    try {
+      await navigator.share({ text });
+      $('share').textContent = 'שותף! ✅';
+      return;
+    } catch {
+      /* בוטל — נופל להעתקה */
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    $('share').textContent = 'הועתק! ✅';
+  } catch {
+    $('share').textContent = text;
+  }
+}
+
 // ---- אירועים ----
 $('submit').addEventListener('click', () => {
   const solvedBefore = game.solved.length;
@@ -382,8 +479,8 @@ $('submit').addEventListener('click', () => {
     if (mode === 'levels') {
       const progress = loadProgress();
       const s = starsFor(game);
-      if (s > ((progress.stars[puzzles[currentLevel].id]) || 0)) {
-        progress.stars[puzzles[currentLevel].id] = s;
+      if (s > ((progress.stars[LEVELS[currentLevel].id]) || 0)) {
+        progress.stars[LEVELS[currentLevel].id] = s;
         saveProgress(progress);
       }
     } else {
@@ -419,15 +516,12 @@ $('hint').addEventListener('click', giveHint);
 $('life').addEventListener('click', giveLife);
 $('buy-freeze').addEventListener('click', buyFreeze);
 
-$('share').addEventListener('click', async () => {
-  const text = shareString(game, puzzleNumber);
-  try {
-    await navigator.clipboard.writeText(text);
-    $('share').textContent = 'הועתק! ✅';
-  } catch {
-    $('share').textContent = text;
-  }
-});
+$('share').addEventListener('click', doShare);
+
+$('help').addEventListener('click', showOnboarding);
+$('ob-next').addEventListener('click', obNext);
+$('ob-skip').addEventListener('click', hideOnboarding);
 
 // ---- אתחול ----
 showLevels();
+maybeShowOnboarding();
