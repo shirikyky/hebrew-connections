@@ -4,34 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>חיבורים — משחק מילים</title>
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <header>
-    <svg id="mascot" viewBox="0 0 120 120" width="92" height="92" role="img" aria-label="חתולי — דמות המשחק">
-      <!-- אוזניים -->
+    <svg id="mascot" viewBox="0 0 120 120" width="84" height="84" role="img" aria-label="חתולי — דמות המשחק">
       <path d="M30 32 L38 12 L52 26 Z" fill="#f5a623"/>
       <path d="M90 32 L82 12 L68 26 Z" fill="#f5a623"/>
       <path d="M33 29 L38 19 L47 25 Z" fill="#f9c46b"/>
       <path d="M87 29 L82 19 L73 25 Z" fill="#f9c46b"/>
-      <!-- גוף -->
       <circle cx="60" cy="62" r="46" fill="#f5a623"/>
-      <!-- סומק -->
       <circle cx="35" cy="70" r="6" fill="#f7a3a3" opacity="0.85"/>
       <circle cx="85" cy="70" r="6" fill="#f7a3a3" opacity="0.85"/>
-      <!-- עיניים -->
       <circle cx="45" cy="56" r="9" fill="#fff"/>
       <circle cx="75" cy="56" r="9" fill="#fff"/>
       <circle cx="45" cy="56" r="4.6" fill="#333"/>
       <circle cx="75" cy="56" r="4.6" fill="#333"/>
       <circle cx="47" cy="54" r="1.7" fill="#fff"/>
       <circle cx="77" cy="54" r="1.7" fill="#fff"/>
-      <!-- פיות (מצבי הבעה) -->
       <g id="face-happy"><path d="M50 70 Q60 80 70 70" stroke="#5a3b1a" stroke-width="3" fill="none" stroke-linecap="round"/></g>
       <g id="face-excited" style="display:none"><ellipse cx="60" cy="74" rx="9" ry="11" fill="#5a3b1a"/><ellipse cx="60" cy="78" rx="5" ry="3.5" fill="#f7a3a3"/></g>
       <g id="face-sad" style="display:none"><path d="M50 78 Q60 68 70 78" stroke="#5a3b1a" stroke-width="3" fill="none" stroke-linecap="round"/></g>
       <g id="face-thinking" style="display:none"><ellipse cx="60" cy="74" rx="4" ry="5" fill="#5a3b1a"/></g>
-      <!-- נצנצים (חגיגה) -->
       <g id="sparkles" style="display:none">
         <text x="12" y="26" font-size="16">✨</text>
         <text x="96" y="30" font-size="14">✨</text>
@@ -41,6 +35,16 @@
     </svg>
     <h1>חיבורים</h1>
     <p class="subtitle">משחק המילים היומי הכי חמוד</p>
+    <div id="stats">
+      <span id="stat-streak" title="רצף יומי">🔥 0</span>
+      <span id="stat-freezes" title="הקפאות רצף">❄️ 0</span>
+      <button id="buy-freeze" type="button" title="צפו במודעה — הקפאת רצף">➕</button>
+      <span class="xp-box">
+        <span id="stat-level">רמה 1</span>
+        <span class="xp-bar"><span id="xp-fill"></span></span>
+        <span id="stat-xp">0/100</span>
+      </span>
+    </div>
   </header>
 
   <nav id="tabs">
@@ -55,6 +59,10 @@
     <div id="message" role="status"></div>
     <main id="grid"></main>
     <section id="solved"></section>
+    <div id="rewards">
+      <button id="hint" type="button">💡 רמז</button>
+      <button id="life" type="button">❤️ חיים</button>
+    </div>
     <div id="controls">
       <button id="back" type="button">🔙</button>
       <button id="shuffle" type="button">🔀</button>
@@ -66,6 +74,14 @@
   <div id="overlay" hidden></div>
   <div id="confetti"></div>
 
-  <script type="module" src="src/app.js?v=3"></script>
+  <div id="ad-modal" hidden>
+    <div class="ad-box">
+      <p class="ad-title">🎬 פרסומת</p>
+      <p id="ad-text">תודה על הצפייה!</p>
+      <div class="ad-bar"><div id="ad-fill"></div></div>
+    </div>
+  </div>
+
+  <script type="module" src="src/app.js?v=4"></script>
 </body>
 </html>
