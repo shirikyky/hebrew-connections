@@ -1,10 +1,13 @@
 {
   "name": "hebrew-connections",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "חיבורים — משחק מילים יומי בעברית (Hebrew Connections)",
   "type": "module",
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test test/ server/test/",
+    "test:client": "node --test test/",
+    "test:server": "node --test server/test/",
+    "start:server": "node server/index.js"
   },
   "license": "UNLICENSED"
 }
