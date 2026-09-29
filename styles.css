@@ -463,3 +463,105 @@ h1 {
 @keyframes fall {
   to { transform: translateY(110vh) rotate(720deg); }
 }
+
+/* ---- כפתור עזרה ---- */
+#help {
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  background: #fff;
+  border-radius: 999px;
+  padding: 4px 10px;
+  box-shadow: 0 2px 0 #e8d5b5;
+}
+
+/* ---- תווית קושי ברמת משחק ---- */
+.lv-diff {
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* ---- onboarding ---- */
+#onboarding {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 80;
+}
+
+.ob-box {
+  background: #fff;
+  border-radius: 20px;
+  padding: 26px 22px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  animation: popIn 0.25s both;
+}
+
+.ob-emoji {
+  font-size: 48px;
+  margin: 0 0 6px;
+}
+
+.ob-box h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+.ob-box p {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.ob-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.ob-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e8d5b5;
+}
+
+.ob-dot.active {
+  background: var(--accent);
+  width: 22px;
+  border-radius: 999px;
+}
+
+.ob-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.ob-btns button {
+  padding: 12px 22px;
+  font-size: 15px;
+  border-radius: 12px;
+  border: none;
+  background: var(--card);
+  box-shadow: 0 3px 0 #e8d5b5;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.ob-btns button.primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 3px 0 var(--accent-dark);
+}
