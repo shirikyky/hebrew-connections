@@ -1,17 +1,18 @@
 :root {
-  --bg: #f4f4f6;
+  --bg: #fff7e8;
+  --bg2: #ffe6c7;
   --card: #ffffff;
-  --text: #1a1a1a;
-  --muted: #666;
-  --accent: #2f6fed;
+  --text: #3a2a1a;
+  --muted: #8a7460;
+  --accent: #f5a623;
+  --accent-dark: #d98d13;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* ווידוא שאלמנטים עם תכונת hidden באמת מוסתרים
-   (גובר על כללי display של ID/class) */
+/* ווידוא שאלמנטים עם תכונת hidden באמת מוסתרים */
 [hidden] {
   display: none !important;
 }
@@ -19,20 +20,40 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: var(--bg);
+  background: linear-gradient(160deg, var(--bg), var(--bg2));
   color: var(--text);
   direction: rtl;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
+/* ---- כותרת + דמות ---- */
 header {
   text-align: center;
-  padding: 16px 12px 4px;
+  padding: 18px 12px 6px;
+}
+
+#mascot {
+  display: block;
+  margin: 0 auto 6px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
+}
+
+#mascot.bounce {
+  animation: mascotBounce 0.6s ease;
+}
+
+@keyframes mascotBounce {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-14px) scale(1.06); }
+  55% { transform: translateY(0); }
+  75% { transform: translateY(-6px); }
 }
 
 h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 30px;
   letter-spacing: 1px;
 }
 
@@ -42,6 +63,86 @@ h1 {
   font-size: 14px;
 }
 
+/* ---- טאבים ---- */
+#tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 12px 12px 6px;
+}
+
+.tab {
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 999px;
+  border: 2px solid #e8d5b5;
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ---- מסך רמות ---- */
+.screen {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 12px;
+}
+
+#level-select h2 {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.level-tile {
+  aspect-ratio: 1;
+  border-radius: 16px;
+  border: none;
+  background: var(--card);
+  box-shadow: 0 3px 0 #e8d5b5;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.level-tile .lv-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent-dark);
+}
+
+.level-tile .lv-stars {
+  font-size: 10px;
+  letter-spacing: -1px;
+}
+
+.level-tile.locked {
+  background: #f0e6d4;
+  box-shadow: none;
+  opacity: 0.6;
+  font-size: 20px;
+  cursor: not-allowed;
+}
+
+/* ---- משחק ---- */
 #lives {
   text-align: center;
   margin: 12px 0 4px;
@@ -49,22 +150,24 @@ h1 {
 
 .life {
   display: inline-block;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: #555;
+  background: var(--accent);
   margin: 0 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .life.lost {
-  background: #d5d5db;
+  background: #e8e2d8;
+  box-shadow: none;
 }
 
 #message {
-  min-height: 22px;
+  min-height: 24px;
   text-align: center;
-  font-weight: 600;
-  color: var(--accent);
+  font-weight: 700;
+  color: var(--accent-dark);
   margin: 4px 12px;
 }
 
@@ -77,28 +180,55 @@ h1 {
   padding: 0 12px;
 }
 
+#grid.shake {
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
 .tile {
   padding: 14px 4px;
   font-size: 15px;
   line-height: 1.2;
-  border-radius: 10px;
-  border: 1px solid #d0d0d8;
+  border-radius: 12px;
+  border: none;
   background: var(--card);
+  box-shadow: 0 3px 0 #e8d5b5;
   cursor: pointer;
   font-family: inherit;
+  font-weight: 700;
   color: inherit;
-  transition: transform 0.05s ease, background 0.1s ease;
-  min-height: 48px;
+  min-height: 50px;
+  transition: transform 0.06s ease, background 0.12s ease;
+  animation: popIn 0.25s both;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.6) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .tile:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
 }
 
 .tile.selected {
-  background: #333;
+  background: var(--accent);
   color: #fff;
-  border-color: #333;
+  box-shadow: 0 3px 0 var(--accent-dark);
+  animation: selPop 0.15s ease;
+}
+
+@keyframes selPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 #solved {
@@ -108,12 +238,13 @@ h1 {
 }
 
 .solved-chip {
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 8px 12px;
   margin: 6px 0;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-weight: 700;
+  color: #2a1a0a;
   text-align: center;
+  animation: popIn 0.3s both;
 }
 
 #controls {
@@ -125,31 +256,32 @@ h1 {
 
 #controls button,
 #share {
-  padding: 12px 22px;
+  padding: 12px 20px;
   font-size: 16px;
-  border-radius: 10px;
-  border: 1px solid #d0d0d8;
+  border-radius: 12px;
+  border: none;
   background: var(--card);
+  box-shadow: 0 3px 0 #e8d5b5;
   cursor: pointer;
   font-family: inherit;
+  font-weight: 700;
 }
 
 #controls button.primary {
   background: var(--accent);
   color: #fff;
-  border-color: var(--accent);
-  font-weight: 700;
+  box-shadow: 0 3px 0 var(--accent-dark);
 }
 
 #share {
   display: block;
   margin: 8px auto;
   background: #25d366;
-  border: none;
+  box-shadow: 0 3px 0 #1da851;
   color: #fff;
-  font-weight: 700;
 }
 
+/* ---- overlay ---- */
 #overlay {
   position: fixed;
   inset: 0;
@@ -158,13 +290,43 @@ h1 {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  z-index: 50;
 }
 
 .overlay-box {
   background: #fff;
-  border-radius: 14px;
-  padding: 20px;
+  border-radius: 18px;
+  padding: 22px;
   width: 100%;
   max-width: 420px;
   text-align: center;
+  animation: popIn 0.25s both;
+}
+
+.win-stars {
+  font-size: 30px;
+  letter-spacing: 2px;
+  margin: 4px 0 10px;
+}
+
+/* ---- קונפטי ---- */
+#confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 16px;
+  border-radius: 2px;
+  animation: fall linear both;
+}
+
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(720deg); }
 }

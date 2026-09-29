@@ -7,6 +7,7 @@ import {
   submitGuess,
   getPuzzleForDate,
   shareString,
+  starsFor,
 } from '../src/game.js';
 
 test('כל חידה מכילה 4 קטגוריות של 4 מילים ללא כפילויות', () => {
@@ -92,4 +93,24 @@ test('shareString מחזיר כותרת ורשת אימוג׳י', () => {
   const s = shareString(game, 7);
   assert.ok(s.includes('חיבורים #7'));
   assert.ok(s.includes('🟨'));
+});
+
+test('starsFor: 0 טעויות = 3 כוכבים, טעות = 2, 2+ = 1', () => {
+  const g0 = createGame(puzzles[0], 1);
+  for (const c of puzzles[0].categories) {
+    for (const w of c.words) toggleSelection(g0, w);
+    submitGuess(g0);
+  }
+  assert.strictEqual(starsFor(g0), 3);
+
+  const g1 = createGame(puzzles[0], 1);
+  // טעות אחת מכוונת
+  const wrong = puzzles[0].categories.map((c) => c.words[0]);
+  for (const w of wrong) toggleSelection(g1, w);
+  submitGuess(g1);
+  for (const c of puzzles[0].categories) {
+    for (const w of c.words) toggleSelection(g1, w);
+    submitGuess(g1);
+  }
+  assert.strictEqual(starsFor(g1), 2);
 });
