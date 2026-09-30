@@ -1,0 +1,6 @@
+# חיבורים — reverse proxy (Caddy, TLS אוטומטי)
+# ⚠️ החלפי את connections.example.com בדומיין האמיתי שלך
+
+connections.example.com {
+    reverse_proxy 127.0.0.1:8787
+}
