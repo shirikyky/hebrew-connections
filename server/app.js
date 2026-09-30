@@ -190,7 +190,7 @@ export function createApp() {
   });
 }
 
-export function startServer(port = 8787) {
+export function startServer(port = 8787, host = '127.0.0.1') {
   const s = createApp();
-  return new Promise((resolve) => s.listen(port, () => resolve(s)));
+  return new Promise((resolve) => s.listen(port, host, () => resolve(s)));
 }
